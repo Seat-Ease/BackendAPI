@@ -8,6 +8,7 @@ require('dotenv').config()
 
 var indexRouter = require('./routes/index');
 const restaurantsRouter = require('./routes/restaurantsRoute')
+const employeesRouter = require('./routes/employesRoute')
 
 var app = express();
 mongoose.connect(process.env.DB_URI)
@@ -22,7 +23,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/restaurants', restaurantsRouter);
-
+app.use('/employes', employeesRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

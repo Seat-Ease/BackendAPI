@@ -47,7 +47,7 @@ class EmployeService {
         }
     }
 
-    static async deleteRestaurant(req, res) {
+    static async deleteEmployee(req, res) {
         try {
             if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ message: 'ID invalide' })
             const employe = await Employe.findByIdAndDelete(req.params.id)
