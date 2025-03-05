@@ -1,6 +1,5 @@
-const { default: mongoose } = require('mongoose');
+const mongoose = require('mongoose');
 const Restaurant = require('../models/Restaurants')
-
 class RestaurantService {
     static async createRestaurantAccount(req, res) {
         try {
