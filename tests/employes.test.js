@@ -30,7 +30,7 @@ describe('Tests des endpoints /employes', () => {
     });
 
     /**
-     * 🔹 Test de création d'un employé
+     * Test de création d'un employé
      */
     test('POST /employes - Créer un employé', async () => {
         const response = await request(app)
@@ -51,7 +51,7 @@ describe('Tests des endpoints /employes', () => {
     });
 
     /**
-     * 🔹 Test de mise à jour d'un employé avec un ID inexistant
+     * Test de mise à jour d'un employé avec un ID inexistant
      */
     test("PUT /employes/:id - Erreur si l'employé n'existe pas", async () => {
         const response = await request(app)
@@ -63,7 +63,7 @@ describe('Tests des endpoints /employes', () => {
     });
 
     /**
-     * 🔹 Test de mise à jour avec un ID invalide
+     * Test de mise à jour avec un ID invalide
      */
     test("PUT /employes/:id - Erreur si l'ID est invalide", async () => {
         const response = await request(app)
@@ -75,7 +75,7 @@ describe('Tests des endpoints /employes', () => {
     });
 
     /**
-     * 🔹 Test de suppression d'un employé inexistant
+     * Test de suppression d'un employé inexistant
      */
     test("DELETE /employes/:id - Erreur si l'employé n'existe pas", async () => {
         const response = await request(app)
@@ -86,7 +86,7 @@ describe('Tests des endpoints /employes', () => {
     });
 
     /**
-     * 🔹 Test de récupération d'un employé avec un ID inexistant
+     * Test de récupération d'un employé avec un ID inexistant
      */
     test("GET /employes/:id - Erreur si l'employé n'existe pas", async () => {
         const response = await request(app)
@@ -97,7 +97,7 @@ describe('Tests des endpoints /employes', () => {
     });
 
     /**
-     * 🔹 Test de récupération avec un ID invalide
+     * Test de récupération avec un ID invalide
      */
     test("GET /employes/:id - Erreur si l'ID est invalide", async () => {
         const response = await request(app)
@@ -108,7 +108,7 @@ describe('Tests des endpoints /employes', () => {
     });
 
     /**
-     * 🔹 Test de liaison entre un employé et un restaurant avec un ID de restaurant invalide
+     * Test de liaison entre un employé et un restaurant avec un ID de restaurant invalide
      */
     test("POST /employes - Erreur si le restaurant n'existe pas", async () => {
         const response = await request(app)
