@@ -3,8 +3,8 @@ const Restaurant = require('../models/Restaurants')
 class RestaurantService {
     static async createRestaurantAccount(req, res) {
         try {
-            const { nom, adresse, telephone } = req.body;
-            if (!nom || !adresse || !telephone) return res.status(400).json({ message: "Tous les champs requis doivent être fournis" })
+            const { nom, courriel, adresse, telephone } = req.body;
+            if (!nom || !courriel || !adresse || !telephone) return res.status(400).json({ message: "Tous les champs requis doivent être fournis" })
             const result = await Restaurant.insertOne({ nom, adresse, telephone })
             return res.status(201).json(result);
         } catch (error) {

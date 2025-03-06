@@ -24,6 +24,7 @@ describe('Tests des endpoints /restaurants', () => {
             .post('/restaurants')
             .send({
                 nom: 'Restaurant Test',
+                courriel: 'info@restaurantTest.ca',
                 adresse: '123 Rue Test',
                 telephone: '123-456-7890',
             })
