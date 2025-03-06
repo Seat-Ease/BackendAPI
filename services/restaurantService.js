@@ -23,7 +23,6 @@ class RestaurantService {
 
     static async getSpecificRestaurant(req, res) {
         try {
-            if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ message: 'ID invalide' })
             const restaurant = await Restaurant.findById(req.params.id)
             if (!restaurant) return res.status(404).json({ message: "Restaurant non trouvé" })
             return res.status(200).json(restaurant)
@@ -34,7 +33,6 @@ class RestaurantService {
 
     static async updateRestaurant(req, res) {
         try {
-            if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ message: 'ID invalide' })
             const restaurant = await Restaurant.findByIdAndUpdate(req.params.id, req.body, { new: true })
             if (!restaurant) return res.status(404).json({ message: "Restaurant non trouvé" })
             return res.status(200).json(restaurant)
@@ -45,7 +43,6 @@ class RestaurantService {
 
     static async deleteRestaurant(req, res) {
         try {
-            if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ message: 'ID invalide' })
             const restaurant = await Restaurant.findByIdAndDelete(req.params.id)
             if (!restaurant) return res.status(404).json({ message: "Restaurant non trouvé" })
             return res.status(200).json({ message: "Restaurant supprimé avec succès" })

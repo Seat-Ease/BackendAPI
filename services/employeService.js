@@ -27,7 +27,6 @@ class EmployeService {
 
     static async getSpecificEmployee(req, res) {
         try {
-            if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ message: 'ID invalide' })
             const employe = await Employe.findById(req.params.id)
             if (!employe) return res.status(404).json({ message: "Employé non trouvé" })
             return res.status(200).json(employe)
@@ -38,7 +37,6 @@ class EmployeService {
 
     static async updateEmploye(req, res) {
         try {
-            if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ message: 'ID invalide' })
             const employe = await Employe.findByIdAndUpdate(req.params.id, req.body, { new: true })
             if (!employe) return res.status(404).json({ message: "Employé non trouvé" })
             return res.status(200).json(employe)
@@ -49,7 +47,6 @@ class EmployeService {
 
     static async deleteEmployee(req, res) {
         try {
-            if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ message: 'ID invalide' })
             const employe = await Employe.findByIdAndDelete(req.params.id)
             if (!employe) return res.status(404).json({ message: "Employé non trouvé" })
             return res.status(200).json({ message: "Employé supprimé avec succès" })
