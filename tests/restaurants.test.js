@@ -23,16 +23,24 @@ describe('Tests des endpoints /restaurants', () => {
         const response = await request(app)
             .post('/restaurants')
             .send({
-                nom: 'Restaurant Test',
-                courriel: 'info@restaurantTest.ca',
-                adresse: '123 Rue Test',
-                telephone: '123-456-7890',
+                info_restaurant: {
+                    nom: 'Restaurant Test',
+                    courriel: 'info@restaurantTest.ca',
+                    adresse: '123 Rue Test',
+                    telephone: '123-456-7890'
+                },
+                info_admin: {
+                    nom: 'Admin Test',
+                    email: 'admin@restaurantTest.ca',
+                    mot_de_passe: 'password123',
+                    telephone: '123-567-4532'
+                }
             })
             .expect(201);
         
-        expect(response.body).toHaveProperty('_id');
-        expect(response.body.nom).toBe('Restaurant Test');
-        restaurantId = response.body._id;
+        expect(response.body.restaurant).toHaveProperty('_id');
+        expect(response.body.restaurant.nom).toBe('Restaurant Test');
+        restaurantId = response.body.restaurant._id;
     });
 
     /**
@@ -87,7 +95,7 @@ describe('Tests des endpoints /restaurants', () => {
         const response = await request(app)
             .put(`/restaurants/${restaurantId}`)
             .send({
-                nom: 'Restaurant Modifié',
+                nom: 'Restaurant Modifié'
             })
             .expect(200);
         

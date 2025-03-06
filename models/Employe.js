@@ -7,6 +7,7 @@ const employeSchema = new Schema({
     nom : String,
     email : String,
     mot_de_passe : String,
+    telephone: String,
     role : String
 })
 
