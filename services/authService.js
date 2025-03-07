@@ -36,10 +36,21 @@ class AuthService {
                 restaurant
             })
         } catch (error) {
-            res.status(500).json({ message: 'Erreur serveur' })
+            return res.status(500).json({ message: 'Erreur serveur' })
         }
     }
-    static async logout(req, res) {}
+    static async logout(req, res) {
+        try {
+            res.clearCookie('auth_token', {
+                httpOnly: true,
+                secure: true, 
+                sameSite: 'Strict'
+            }) 
+            return res.status(200).json({ message: 'Déconnexion réussie' })
+        } catch (error) {
+            return res.status(500).json({ message: 'Erreur serveur' })
+        }
+    }
 }
 
 module.exports = AuthService

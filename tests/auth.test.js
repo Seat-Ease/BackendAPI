@@ -3,7 +3,6 @@ const app = require('../app');
 const mongoose = require('mongoose');
 const Employe = require('../models/Employe');
 const Restaurant = require('../models/Restaurants');
-const jwt = require('jsonwebtoken');
 
 describe('Tests des endpoints /auth/login', () => {
     let employeId;
