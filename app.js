@@ -6,6 +6,9 @@ var logger = require('morgan');
 const mongoose = require('mongoose')
 require('dotenv').config()
 
+const { isUserAuthenticated } = require('./middlewares/authentication')
+const { checkUserPermission } = require('./middlewares/request')
+
 var indexRouter = require('./routes/index');
 const restaurantsRouter = require('./routes/restaurantsRoute')
 const employeesRouter = require('./routes/employesRoute')

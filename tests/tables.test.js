@@ -87,9 +87,9 @@ describe('Tests des endpoints /tables', () => {
             .post('/tables')
             .set('Cookie', adminToken)
             .send({
-                numero: 1,
-                capacite: 4,
-                id_restaurant: restaurantId
+                id_restaurant: restaurantId,
+                numero_table: 1,
+                capacite_table: 4
             })
             .expect(201);
         
@@ -102,8 +102,8 @@ describe('Tests des endpoints /tables', () => {
             .post('/tables')
             .set('Cookie', regularToken)
             .send({
-                numero: 2,
-                capacite: 2,
+                numero_table: 2,
+                capacite_table: 2,
                 id_restaurant: restaurantId
             })
             .expect(401);
@@ -118,17 +118,17 @@ describe('Tests des endpoints /tables', () => {
         const response = await request(app)
             .put(`/tables/${tableId}`)
             .set('Cookie', adminToken)
-            .send({ capacite: 6 })
+            .send({ capacite_table: 6 })
             .expect(200);
         
-        expect(response.body.capacite).toBe(6);
+        expect(response.body.capacite_table).toBe(6);
     });
 
     test('PUT /tables/:id - Un employé régulier ne peut pas modifier une table', async () => {
         const response = await request(app)
             .put(`/tables/${tableId}`)
             .set('Cookie', regularToken)
-            .send({ capacite: 8 })
+            .send({ capacite_table: 8 })
             .expect(401);
         
         expect(response.body.message).toBe("Vous n'êtes pas autorisé à faire cette action");

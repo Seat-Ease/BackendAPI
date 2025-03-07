@@ -8,10 +8,10 @@ class AuthService {
     static async login(req, res) {
         try {
             const { email, mot_de_passe } = req.body
-            
+
             if (!email || !mot_de_passe) return res.status(400).json({ message: "Email et mot de passe sont requis" })
             const employe = await Employe.findOne({ email })
-            
+
             if (!employe || !bcrypt.compareSync(mot_de_passe, employe.mot_de_passe)) {
                 return res.status(401).json({ message: 'Email ou mot de passe incorrect' })
             }
