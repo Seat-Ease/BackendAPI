@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const Schema = mongoose.Schema()
+const { Schema } = mongoose
 
 const tableSchema = new Schema({
     id_restaurant: String,
