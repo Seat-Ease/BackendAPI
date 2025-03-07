@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const EmployeService = require('../services/employeService')
-const isIdValid = require('../middlewares/id')
+const { isIdValid } = require('../middlewares/request')
 
 router.post('/', EmployeService.createNewEmployee)
 router.get('/', EmployeService.getAllEmployees)

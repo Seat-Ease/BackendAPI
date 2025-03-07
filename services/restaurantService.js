@@ -5,9 +5,6 @@ class RestaurantService {
     static async createRestaurantAccount(req, res) {
         try {
             const { info_restaurant, info_admin } = req.body;
-            if (!info_restaurant || !info_admin) return res.status(400).json({ message: "Tous les champs requis doivent être fournis" })
-            if (!info_restaurant.nom || !info_restaurant.courriel || !info_restaurant.adresse || !info_restaurant.telephone) return res.status(400).json({ message: "Tous les champs requis doivent être fournis" })
-            if (!info_admin.nom || !info_admin.email || !info_admin.mot_de_passe || !info_admin.telephone) return res.status(400).json({ message: "Tous les champs requis doivent être fournis" })
             const resultRestaurant = await Restaurant.insertOne(info_restaurant)
             const newEmploye = new Employe()
             newEmploye.nom =  info_admin.nom
@@ -19,6 +16,7 @@ class RestaurantService {
             const resultAdmin = await Employe.insertOne(newEmploye)
             console.log(resultAdmin)
             const result = { restaurant: resultRestaurant, admin: resultAdmin }
+            console.log(result)
             return res.status(201).json(result);
         } catch (error) {
             return res.status(500).json({ message: "Erreur serveur" })
