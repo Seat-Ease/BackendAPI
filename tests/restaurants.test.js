@@ -19,6 +19,9 @@ describe('Tests des endpoints /restaurants', () => {
     });
 
     let restaurantId;
+    let adminToken;
+    let regularToken;
+    let adminInfo;
 
     /**
      * Test de création d'un restaurant avec un admin obligatoire
@@ -47,6 +50,7 @@ describe('Tests des endpoints /restaurants', () => {
         expect(response.body).toHaveProperty('admin');
         expect(response.body.admin.nom).toBe('Admin Test');
         restaurantId = response.body.restaurant._id;
+        adminInfo = response.body.admin
     });
 
     /**
@@ -152,11 +156,21 @@ describe('Tests des endpoints /restaurants', () => {
     });
 
     /**
-     * Test de mise à jour d'un restaurant
+     * Test de mise à jour d'un restaurant par un admin
      */
-    test('PUT /restaurants/:id - Mettre à jour un restaurant', async () => {
+    test('PUT /restaurants/:id - Mettre à jour un restaurant par un admin', async () => {
+        // Connexion avec l'admin
+        const loginResponse = await request(app)
+            .post('/auth/login')
+            .send({
+                email: 'admin@restaurantTest.ca',
+                mot_de_passe: 'password123'
+            })
+            .expect(200);
+        adminToken = loginResponse.headers['set-cookie'];
         const response = await request(app)
             .put(`/restaurants/${restaurantId}`)
+            .set('Cookie', adminToken)
             .send({
                 nom: 'Restaurant Modifié'
             })
@@ -166,11 +180,49 @@ describe('Tests des endpoints /restaurants', () => {
     });
 
     /**
-     * Test de mise à jour avec un ID inexistant
+     * Test de mise à jour d'un restaurant par un regular
      */
-    test("PUT /restaurants/:id - Erreur si le restaurant n'existe pas", async () => {
+    test('PUT /restaurants/:id - Mettre à jour un restaurant par un regular', async () => {
+        // Créer un employé régulier
+        const regularResponse = await request(app)
+            .post('/employes')
+            .set('Cookie', adminToken)
+            .send({
+                nom: 'Employé Test',
+                email: 'employe@test.com',
+                mot_de_passe: 'password123',
+                role: 'regular',
+                id_restaurant: restaurantId
+            })
+            .expect(201);
+        
+        // Connexion avec l'employé régulier
+        const loginRegularResponse = await request(app)
+            .post('/auth/login')
+            .send({
+                email: 'employe@test.com',
+                mot_de_passe: 'password123'
+            })
+            .expect(200);
+        regularToken = loginRegularResponse.headers['set-cookie'];
+        const response = await request(app)
+            .put(`/restaurants/${restaurantId}`)
+            .set('Cookie', regularToken)
+            .send({
+                nom: 'Tentative Modification'
+            })
+            .expect(401);
+        
+        expect(response.body.message).toBe("Vous n'êtes pas autorisé à faire cette action");
+    });
+
+    /**
+     * Test de mise à jour avec un ID inexistant par un admin
+     */
+    test("PUT /restaurants/:id - Erreur si le restaurant n'existe pas (par un admin)", async () => {
         const response = await request(app)
             .put('/restaurants/660000000000000000000000')
+            .set('Cookie', adminToken)
             .send({ nom: 'Nom Test' })
             .expect(404);
         
@@ -178,11 +230,12 @@ describe('Tests des endpoints /restaurants', () => {
     });
 
     /**
-     * Test de suppression d'un restaurant
+     * Test de suppression d'un restaurant par un admin
      */
-    test('DELETE /restaurants/:id - Supprimer un restaurant', async () => {
+    test('DELETE /restaurants/:id - Supprimer un restaurant par un admin', async () => {
         await request(app)
             .delete(`/restaurants/${restaurantId}`)
+            .set('Cookie', adminToken)
             .expect(200);
         
         const checkResponse = await request(app)
@@ -193,13 +246,26 @@ describe('Tests des endpoints /restaurants', () => {
     });
 
     /**
-     * Test de suppression avec un ID inexistant
+     * Test de suppression avec un ID inexistant par un admin
      */
-    test("DELETE /restaurants/:id - Erreur si le restaurant n'existe pas", async () => {
+    test("DELETE /restaurants/:id - Erreur si le restaurant n'existe pas (par un admin)", async () => {
         const response = await request(app)
             .delete('/restaurants/660000000000000000000000')
+            .set('Cookie', adminToken)
             .expect(404);
         
         expect(response.body.message).toBe('Restaurant non trouvé');
+    });
+
+    /**
+     * Test de suppression d'un restaurant par un regular
+     */
+    test('DELETE /restaurants/:id - Un employé régulier ne peut pas supprimer un restaurant', async () => {
+        const response = await request(app)
+            .delete(`/restaurants/${restaurantId}`)
+            .set('Cookie', regularToken)
+            .expect(401);
+        
+        expect(response.body.message).toBe("Vous n'êtes pas autorisé à faire cette action");
     });
 });
