@@ -10,6 +10,7 @@ var indexRouter = require('./routes/index');
 const restaurantsRouter = require('./routes/restaurantsRoute')
 const employeesRouter = require('./routes/employesRoute')
 const clientsRouter = require('./routes/clientsRoute')
+const authRouter = require('./routes/authRoute')
 
 var app = express();
 mongoose.connect(process.env.DB_URI)
@@ -26,6 +27,7 @@ app.use('/', indexRouter);
 app.use('/restaurants', restaurantsRouter);
 app.use('/employes', employeesRouter);
 app.use('/clients', clientsRouter);
+app.use('/auth', authRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
