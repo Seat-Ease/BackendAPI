@@ -8,7 +8,8 @@ const employeSchema = new Schema({
     email : String,
     mot_de_passe : String,
     telephone: String,
-    role : String
+    role : String,
+    token: String
 })
 
 employeSchema.methods.generateHash = function(password) {

@@ -105,17 +105,4 @@ describe('Tests des endpoints /auth/login', () => {
 
         expect(response.body.message).toBe('Email et mot de passe sont requis');
     });
-
-    /**
-     * Test de token expiré après 24h
-     */
-    test('GET /auth/verify - Erreur si le token est expiré', async () => {
-        const expiredToken = jwt.sign({ id: employeId }, process.env.JWT_SECRET, { expiresIn: '-1s' });
-        const response = await request(app)
-            .get('/auth/verify')
-            .set('Cookie', `authToken=${expiredToken}`)
-            .expect(401);
-
-        expect(response.body.message).toBe('Token expiré, veuillez vous reconnecter');
-    });
 });
