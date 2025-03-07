@@ -5,11 +5,17 @@ const Restaurant = require('../models/Restaurants')
 class EmployeService {
     static async createNewEmployee(req, res) {
         try {
-            const { nom, email, mot_de_passe, role, id_restaurant } = req.body
+            const { nom, email, mot_de_passe, role, telephone, id_restaurant } = req.body
             const restaurant = await Restaurant.findById(id_restaurant)
             if (!restaurant) return res.status(404).json({ message: "Restaurant non trouvé" })
             if (!nom || !email || !mot_de_passe || !role || !id_restaurant) return res.status(400).json({ message: "Tous les champs requis doivent être fournis" })
-            const employe = await Employe.insertOne(req.body)
+            const newEmploye = new Employe()
+            newEmploye.nom = nom
+            newEmploye.email = email
+            newEmploye.mot_de_passe = newEmploye.generateHash(mot_de_passe)
+            newEmploye.telephone = telephone
+            newEmploye.id_restaurant = id_restaurant
+            const employe = await Employe.insertOne(newEmploye)
             return res.status(201).json(employe)
         } catch (error) {
             return res.status(500).json({ message: "Erreur serveur" })

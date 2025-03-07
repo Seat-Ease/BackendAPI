@@ -1,7 +1,7 @@
 const Employe = require('../models/Employe')
 const jwt = require('jwt-simple')
 
-const isUserAuthenticated = async () => {
+const isUserAuthenticated = async (req, res, next) => {
     try {
         const token = req.cookies.auth_token 
         if (!token) {

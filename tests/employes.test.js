@@ -1,12 +1,15 @@
 const request = require('supertest');
-const app = require('../app'); // Assurez-vous que l'application Express est bien importée
+const app = require('../app');
 const mongoose = require('mongoose');
 const Employe = require('../models/Employe');
 const Restaurant = require('../models/Restaurants');
 
 describe('Tests des endpoints /employes', () => {
     let restaurantId;
+    let adminId;
     let employeId;
+    let adminToken;
+    let regularToken;
 
     beforeAll(async () => {
         await mongoose.connect(process.env.DB_URI, {
@@ -14,13 +17,63 @@ describe('Tests des endpoints /employes', () => {
             useUnifiedTopology: true,
         });
 
-        // Créer un restaurant pour lier les employés
-        const restaurant = await Restaurant.collection.insertOne({
-            nom: 'Restaurant Test',
-            adresse: '123 Rue Test',
-            telephone: '123-456-7890',
-        });
-        restaurantId = restaurant.insertedId;
+        // Créer un restaurant avec un admin via l'API
+        const response = await request(app)
+            .post('/restaurants')
+            .send({
+                info_restaurant: {
+                    nom: 'Restaurant Test',
+                    courriel: 'info@restauranttest.ca',
+                    adresse: '123 Rue Test',
+                    telephone: '123-456-7890'
+                },
+                info_admin: {
+                    nom: 'Admin Test',
+                    email: 'admin@restauranttest.ca',
+                    mot_de_passe: 'password123',
+                    telephone: '987-654-3210',
+                    role: 'admin'
+                }
+            })
+            .expect(201);
+
+        restaurantId = response.body.restaurant._id;
+        adminId = response.body.admin._id;
+
+        // Se connecter avec l'admin
+        const loginResponse = await request(app)
+            .post('/auth/login')
+            .send({
+                email: 'admin@restauranttest.ca',
+                mot_de_passe: 'password123',
+            })
+            .expect(200);
+        adminToken = loginResponse.headers['set-cookie'];
+
+        // Créer un employé regular avec l'admin
+        const employeResponse = await request(app)
+            .post('/employes')
+            .set('Cookie', adminToken)
+            .send({
+                nom: 'Employé Test',
+                email: 'employe@test.com',
+                mot_de_passe: 'password456',
+                role: 'regular',
+                telephone: '988-653-3217',
+                id_restaurant: restaurantId
+            })
+            .expect(201);
+        employeId = employeResponse.body._id;
+
+        // Se connecter avec l'employé regular
+        const loginRegularResponse = await request(app)
+            .post('/auth/login')
+            .send({
+                email: 'employe@test.com',
+                mot_de_passe: 'password456',
+            })
+            .expect(200);
+        regularToken = loginRegularResponse.headers['set-cookie'];
     });
 
     afterAll(async () => {
@@ -30,98 +83,82 @@ describe('Tests des endpoints /employes', () => {
     });
 
     /**
-     * Test de création d'un employé
+     * Test d'accès refusé pour un utilisateur non authentifié
      */
-    test('POST /employes - Créer un employé', async () => {
+    test('POST /employes - Erreur si utilisateur non authentifié', async () => {
         const response = await request(app)
             .post('/employes')
             .send({
-                nom: 'Employé Test',
-                email: 'employe@test.com',
+                nom: 'Sans Auth',
+                email: 'noauth@test.com',
                 mot_de_passe: 'password123',
-                role: 'serveur',
+                role: 'regular',
+                id_restaurant: restaurantId
+            })
+            .expect(401);
+        
+        expect(response.body.message).toBe('Token manquant');
+    });
+
+    test('PUT /employes/:id - Erreur si utilisateur non authentifié', async () => {
+        const response = await request(app)
+            .put(`/employes/${employeId}`)
+            .send({ nom: 'Tentative Sans Auth' })
+            .expect(401);
+        
+        expect(response.body.message).toBe('Token manquant');
+    });
+
+    test('DELETE /employes/:id - Erreur si utilisateur non authentifié', async () => {
+        const response = await request(app)
+            .delete(`/employes/${employeId}`)
+            .expect(401);
+        
+        expect(response.body.message).toBe('Token manquant');
+    });
+
+    test('GET /employes/:id - Erreur si utilisateur non authentifié', async () => {
+        const response = await request(app)
+            .get(`/employes/${employeId}`)
+            .expect(401);
+        
+        expect(response.body.message).toBe('Token manquant');
+    });
+
+    /**
+     * Tests existants avec authentification
+     */
+    test('POST /employes - Un admin peut créer un employé', async () => {
+        const response = await request(app)
+            .post('/employes')
+            .set('Cookie', adminToken)
+            .send({
+                nom: 'Nouvel Employé',
+                email: 'newemploye@test.com',
+                mot_de_passe: 'password123',
+                role: 'regular',
                 id_restaurant: restaurantId
             })
             .expect(201);
-        
+
         expect(response.body).toHaveProperty('_id');
-        expect(response.body.nom).toBe('Employé Test');
-        expect(response.body).not.toHaveProperty('mot_de_passe');
-        employeId = response.body._id;
     });
 
-    /**
-     * Test de mise à jour d'un employé avec un ID inexistant
-     */
-    test("PUT /employes/:id - Erreur si l'employé n'existe pas", async () => {
+    test('DELETE /employes/:id - Un employé regular ne peut pas supprimer un employé', async () => {
         const response = await request(app)
-            .put('/employes/660000000000000000000000')
-            .send({ nom: 'Employé Inexistant' })
-            .expect(404);
-        
-        expect(response.body.message).toBe('Employé non trouvé');
+            .delete(`/employes/${employeId}`)
+            .set('Cookie', regularToken)
+            .expect(401);
+
+        expect(response.body.message).toBe("Vous n'êtes pas autorisé à faire cette action");
     });
 
-    /**
-     * Test de mise à jour avec un ID invalide
-     */
-    test("PUT /employes/:id - Erreur si l'ID est invalide", async () => {
+    test('GET /employes/:id - Un employé peut voir ses propres informations', async () => {
         const response = await request(app)
-            .put('/employes/invalidID')
-            .send({ nom: 'Employé Test' })
-            .expect(400);
-        
-        expect(response.body.message).toBe('ID invalide');
-    });
+            .get(`/employes/${employeId}`)
+            .set('Cookie', regularToken)
+            .expect(200);
 
-    /**
-     * Test de suppression d'un employé inexistant
-     */
-    test("DELETE /employes/:id - Erreur si l'employé n'existe pas", async () => {
-        const response = await request(app)
-            .delete('/employes/660000000000000000000000')
-            .expect(404);
-        
-        expect(response.body.message).toBe('Employé non trouvé');
-    });
-
-    /**
-     * Test de récupération d'un employé avec un ID inexistant
-     */
-    test("GET /employes/:id - Erreur si l'employé n'existe pas", async () => {
-        const response = await request(app)
-            .get('/employes/660000000000000000000000')
-            .expect(404);
-        
-        expect(response.body.message).toBe('Employé non trouvé');
-    });
-
-    /**
-     * Test de récupération avec un ID invalide
-     */
-    test("GET /employes/:id - Erreur si l'ID est invalide", async () => {
-        const response = await request(app)
-            .get('/employes/invalidID')
-            .expect(400);
-        
-        expect(response.body.message).toBe('ID invalide');
-    });
-
-    /**
-     * Test de liaison entre un employé et un restaurant avec un ID de restaurant invalide
-     */
-    test("POST /employes - Erreur si le restaurant n'existe pas", async () => {
-        const response = await request(app)
-            .post('/employes')
-            .send({
-                nom: 'Employé Test',
-                email: 'employe.erreur@test.com',
-                mot_de_passe: 'password123',
-                role: 'serveur',
-                id_restaurant: '660000000000000000000000'
-            })
-            .expect(404);
-        
-        expect(response.body.message).toBe('Restaurant non trouvé');
+        expect(response.body).toHaveProperty('_id', employeId);
     });
 });

@@ -14,9 +14,7 @@ class RestaurantService {
             newEmploye.id_restaurant = resultRestaurant._id
             newEmploye.role = 'admin'
             const resultAdmin = await Employe.insertOne(newEmploye)
-            console.log(resultAdmin)
             const result = { restaurant: resultRestaurant, admin: resultAdmin }
-            console.log(result)
             return res.status(201).json(result);
         } catch (error) {
             return res.status(500).json({ message: "Erreur serveur" })

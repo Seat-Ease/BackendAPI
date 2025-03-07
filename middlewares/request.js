@@ -7,6 +7,11 @@ function isIdValid(req, res, next) {
     return next()
 }
 
+function checkUserPermission(req, res, next) {
+    if (req.employe.role !== 'admin') return res.status(401).json({ message: "Vous n'êtes pas autorisé à faire cette action" });
+    next()
+}
+
 async function restaurantAccountCreationMiddleware(req, res, next) {
     try {
         const { info_restaurant, info_admin } = req.body;
@@ -27,4 +32,4 @@ async function restaurantAccountCreationMiddleware(req, res, next) {
     }
 }
 
-module.exports = { isIdValid, restaurantAccountCreationMiddleware };
+module.exports = { isIdValid, checkUserPermission, restaurantAccountCreationMiddleware };
