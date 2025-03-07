@@ -1,15 +1,12 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
 const mongoose = require('mongoose')
 require('dotenv').config()
 
-const { isUserAuthenticated } = require('./middlewares/authentication')
-const { checkUserPermission } = require('./middlewares/request')
-
-var indexRouter = require('./routes/index');
+const indexRouter = require('./routes/index');
 const restaurantsRouter = require('./routes/restaurantsRoute')
 const employeesRouter = require('./routes/employesRoute')
 const clientsRouter = require('./routes/clientsRoute')
@@ -17,7 +14,7 @@ const authRouter = require('./routes/authRoute')
 const tablesRouter = require('./routes/tablesRoute')
 const disponibilitesRouter = require('./routes/disponibilitesRoute')
 
-var app = express();
+const app = express();
 mongoose.connect(process.env.DB_URI)
 .then(result => { console.log('connected to MongoDB')})
 .catch(error => console.error(error))
