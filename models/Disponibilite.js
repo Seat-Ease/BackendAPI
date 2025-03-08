@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const Restaurant = require('./Restaurants')
 const { Schema } = mongoose
 
 const disponibiliteSchema = new Schema({
@@ -7,6 +8,10 @@ const disponibiliteSchema = new Schema({
     heure: String,
     reservee: Boolean
 })
+
+disponibiliteSchema.post('save', async function (doc) {
+    await Restaurant.findByIdAndUpdate(doc.id_restaurant, { $push: { disponibilites: doc._id } });
+});
 
 const Disponibilite = mongoose.model('Disponibilite', disponibiliteSchema)
 

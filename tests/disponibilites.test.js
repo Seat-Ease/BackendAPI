@@ -10,12 +10,17 @@ describe('Tests des endpoints /disponibilites', () => {
     let adminToken;
     let regularToken;
     let disponibiliteId;
+    let disponibiliteId1, disponibiliteId2, disponibiliteId3;
+    let today, tomorrow;
 
     beforeAll(async () => {
         await mongoose.connect(process.env.DB_URI, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
         });
+
+        today = new Date().toISOString().split('T')[0];
+        tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
         // Créer un restaurant avec un admin via l'API
         const response = await request(app)
@@ -70,6 +75,28 @@ describe('Tests des endpoints /disponibilites', () => {
             })
             .expect(200);
         regularToken = loginRegularResponse.headers['set-cookie'];
+
+        // Ajouter plusieurs disponibilités
+        const disponibilite1 = await request(app)
+            .post(`/restaurants/${restaurantId}/disponibilites`)
+            .set('Cookie', adminToken)
+            .send({ date: today, heure: '18:00', id_restaurant: restaurantId })
+            .expect(201);
+        disponibiliteId1 = disponibilite1.body._id;
+
+        const disponibilite2 = await request(app)
+            .post(`/restaurants/${restaurantId}/disponibilites`)
+            .set('Cookie', adminToken)
+            .send({ date: today, heure: '20:00', id_restaurant: restaurantId })
+            .expect(201);
+        disponibiliteId2 = disponibilite2.body._id;
+
+        const disponibilite3 = await request(app)
+            .post(`/restaurants/${restaurantId}/disponibilites`)
+            .set('Cookie', adminToken)
+            .send({ date: tomorrow, heure: '19:00', id_restaurant: restaurantId })
+            .expect(201);
+        disponibiliteId3 = disponibilite3.body._id;
     });
 
     afterAll(async () => {
@@ -84,7 +111,7 @@ describe('Tests des endpoints /disponibilites', () => {
      */
     test('POST /disponibilites - Un admin peut créer une disponibilité', async () => {
         const response = await request(app)
-            .post('/disponibilites')
+            .post(`/restaurants/${restaurantId}/disponibilites`)
             .set('Cookie', adminToken)
             .send({
                 date: '2025-03-10',
@@ -99,7 +126,7 @@ describe('Tests des endpoints /disponibilites', () => {
 
     test('POST /disponibilites - Un employé régulier ne peut pas créer une disponibilité', async () => {
         const response = await request(app)
-            .post('/disponibilites')
+            .post(`/restaurants/${restaurantId}/disponibilites`)
             .set('Cookie', regularToken)
             .send({
                 date: '2025-03-11',
@@ -112,11 +139,30 @@ describe('Tests des endpoints /disponibilites', () => {
     });
 
     /**
+     * Test de récupération des disponibilités d'un restaurant
+     */
+    test('GET /disponibilites/:id_restaurant - Récupérer toutes les disponibilités (par défaut)', async () => {
+        const response = await request(app)
+            .get(`/restaurants/${restaurantId}/disponibilites`)
+            .expect(200);
+        
+        expect(response.body.length).toBe(2);
+    });
+
+    test('GET /disponibilites/:id_restaurant - Filtrer par date', async () => {
+        const response = await request(app)
+            .get(`/restaurants/${restaurantId}/disponibilites?date=${tomorrow}`)
+            .expect(200);
+        
+        expect(response.body.length).toBe(1);
+    });
+
+    /**
      * Test de modification d'une disponibilité (Admin requis)
      */
     test('PUT /disponibilites/:id - Un admin peut modifier une disponibilité', async () => {
         const response = await request(app)
-            .put(`/disponibilites/${disponibiliteId}`)
+            .put(`/restaurants/${restaurantId}/disponibilites/${disponibiliteId}`)
             .set('Cookie', adminToken)
             .send({ heure: '20:00' })
             .expect(200);
@@ -126,7 +172,7 @@ describe('Tests des endpoints /disponibilites', () => {
 
     test('PUT /disponibilites/:id - Un employé régulier ne peut pas modifier une disponibilité', async () => {
         const response = await request(app)
-            .put(`/disponibilites/${disponibiliteId}`)
+            .put(`/restaurants/${restaurantId}/disponibilites/${disponibiliteId}`)
             .set('Cookie', regularToken)
             .send({ heure: '21:00' })
             .expect(401);
@@ -139,14 +185,14 @@ describe('Tests des endpoints /disponibilites', () => {
      */
     test('DELETE /disponibilites/:id - Un admin peut supprimer une disponibilité', async () => {
         await request(app)
-            .delete(`/disponibilites/${disponibiliteId}`)
+            .delete(`/restaurants/${restaurantId}/disponibilites/${disponibiliteId}`)
             .set('Cookie', adminToken)
             .expect(200);
     });
 
     test('DELETE /disponibilites/:id - Un employé régulier ne peut pas supprimer une disponibilité', async () => {
         const response = await request(app)
-            .delete(`/disponibilites/${disponibiliteId}`)
+            .delete(`/restaurants/${restaurantId}/disponibilites/${disponibiliteId}`)
             .set('Cookie', regularToken)
             .expect(401);
         

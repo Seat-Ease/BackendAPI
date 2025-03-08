@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const RestaurantService = require('../services/restaurantService')
 const TableService = require('../services/tableService')
+const DisponibiliteService = require('../services/disponibiliteService')
 const { restaurantAccountCreationMiddleware, checkUserPermission } = require('../middlewares/request')
 const { isUserAuthenticated } = require('../middlewares/authentication')
 
@@ -16,5 +17,11 @@ router.get('/:id_restaurant/tables', TableService.getRestaurantTables)
 router.get('/:id_restaurant/tables/:id_table', TableService.getSpecificRestaurantTable)
 router.put('/:id_restaurant/tables/:id_table', isUserAuthenticated, checkUserPermission, TableService.updateTable)
 router.delete('/:id_restaurant/tables/:id_table', isUserAuthenticated, checkUserPermission, TableService.deleteTable)
+
+router.post('/:id_restaurant/disponibilites', isUserAuthenticated, checkUserPermission, DisponibiliteService.createAvailability)
+router.get('/:id_restaurant/disponibilites', DisponibiliteService.getRestaurantAvailabilities)
+router.get('/:id_restaurant/disponibilites/:id_disponibilites', DisponibiliteService.getSpecificRestaurantAvailability)
+router.put('/:id_restaurant/disponibilites/:id_disponibilites', isUserAuthenticated, checkUserPermission, DisponibiliteService.updateAvailability)
+router.delete('/:id_restaurant/disponibilites/:id_disponibilites', isUserAuthenticated, checkUserPermission, DisponibiliteService.deleteAvailability)
 
 module.exports = router
