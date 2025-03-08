@@ -12,9 +12,25 @@ class TableService {
             return res.status(500).json({ message: "Erreur serveur" })
         }
     }
+    static async getRestaurantTables(req, res) {
+        try {
+            const tables = await Table.find({ id_restaurant: req.params.id_restaurant })
+            return res.status(200).json(tables)
+        } catch (error) {
+            return res.status(500).json({ message: "Erreur serveur" })
+        }
+    }
+    static async getSpecificRestaurantTable(req, res) {
+        try {
+            const table = await Table.findById(req.params.id_table)
+            return res.status(200).json(table)
+        } catch (error) {
+            return res.status(500).json({ message: "Erreur serveur" })
+        }
+    }
     static async updateTable(req, res) {
         try {
-            const table = await Table.findByIdAndUpdate(req.params.id, req.body, { new: true })
+            const table = await Table.findByIdAndUpdate(req.params.id_table, req.body, { new: true })
             if (!table) return res.status(404).json({ message: "Table non trouvée" })
             return res.status(200).json(table)
         } catch (error) {
@@ -23,7 +39,7 @@ class TableService {
     }
     static async deleteTable(req, res) {
         try {
-            const table = await Table.findByIdAndDelete(req.params.id)
+            const table = await Table.findByIdAndDelete(req.params.id_table)
             if (!table) return res.status(404).json({ message: "Table non trouvée" })
             return res.status(200).json({ message: "Table supprimée avec succès" })
         } catch (error) {

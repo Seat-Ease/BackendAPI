@@ -11,7 +11,6 @@ const restaurantsRouter = require('./routes/restaurantsRoute')
 const employeesRouter = require('./routes/employesRoute')
 const clientsRouter = require('./routes/clientsRoute')
 const authRouter = require('./routes/authRoute')
-const tablesRouter = require('./routes/tablesRoute')
 const disponibilitesRouter = require('./routes/disponibilitesRoute')
 
 const app = express();
@@ -29,7 +28,6 @@ app.use('/', indexRouter);
 app.use('/restaurants', restaurantsRouter);
 app.use('/employes', employeesRouter);
 app.use('/clients', clientsRouter);
-app.use('/tables', tablesRouter);
 app.use('/disponibilites', disponibilitesRouter);
 app.use('/auth', authRouter);
 

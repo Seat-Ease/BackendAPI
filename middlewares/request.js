@@ -1,6 +1,5 @@
 const mongoose = require('mongoose')
 const Restaurant = require('../models/Restaurants')
-const Employe = require('../models/Employe')
 
 function isIdValid(req, res, next) {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).json({ message: 'ID invalide' })

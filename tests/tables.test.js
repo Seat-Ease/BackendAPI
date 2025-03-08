@@ -82,9 +82,9 @@ describe('Tests des endpoints /tables', () => {
     /**
      * Test de création d'une table (Admin requis)
      */
-    test('POST /tables - Un admin peut créer une table', async () => {
+    test('POST /restaurants/tables - Un admin peut créer une table', async () => {
         const response = await request(app)
-            .post('/tables')
+            .post(`/restaurants/${restaurantId}/tables`)
             .set('Cookie', adminToken)
             .send({
                 id_restaurant: restaurantId,
@@ -95,11 +95,18 @@ describe('Tests des endpoints /tables', () => {
         
         expect(response.body).toHaveProperty('_id');
         tableId = response.body._id;
+
+        // Test pour se rassurer que la table est ajoutée dans la liste de tables du restaurant
+        const restaurantResponse = await request(app)
+            .get(`/restaurants/${restaurantId}/tables/${tableId}`)
+            .expect(200);
+        
+        expect(restaurantResponse.body._id).toBe(tableId);
     });
 
-    test('POST /tables - Un employé régulier ne peut pas créer une table', async () => {
+    test('POST /restaurants/tables - Un employé régulier ne peut pas créer une table', async () => {
         const response = await request(app)
-            .post('/tables')
+            .post(`/restaurants/${restaurantId}/tables`)
             .set('Cookie', regularToken)
             .send({
                 numero_table: 2,
@@ -111,12 +118,22 @@ describe('Tests des endpoints /tables', () => {
         expect(response.body.message).toBe("Vous n'êtes pas autorisé à faire cette action");
     });
 
+    test('POST /restaurants/tables - Erreur si des champs sont manquants', async () => {
+        const response = await request(app)
+            .post(`/restaurants/${restaurantId}/tables`)
+            .set('Cookie', adminToken)
+            .send({})
+            .expect(400);
+        
+        expect(response.body.message).toBe("Tous les champs requis doivent être fournis");
+    });
+
     /**
      * Test de modification d'une table (Admin requis)
      */
-    test('PUT /tables/:id - Un admin peut modifier une table', async () => {
+    test('PUT /restaurants/tables/:id - Un admin peut modifier une table', async () => {
         const response = await request(app)
-            .put(`/tables/${tableId}`)
+            .put(`/restaurants/${restaurantId}/tables/${tableId}`)
             .set('Cookie', adminToken)
             .send({ capacite_table: 6 })
             .expect(200);
@@ -124,9 +141,9 @@ describe('Tests des endpoints /tables', () => {
         expect(response.body.capacite_table).toBe(6);
     });
 
-    test('PUT /tables/:id - Un employé régulier ne peut pas modifier une table', async () => {
+    test('PUT /restaurants/tables/:id - Un employé régulier ne peut pas modifier une table', async () => {
         const response = await request(app)
-            .put(`/tables/${tableId}`)
+            .put(`/restaurants/${restaurantId}/tables/${tableId}`)
             .set('Cookie', regularToken)
             .send({ capacite_table: 8 })
             .expect(401);
@@ -137,16 +154,16 @@ describe('Tests des endpoints /tables', () => {
     /**
      * Test de suppression d'une table (Admin requis)
      */
-    test('DELETE /tables/:id - Un admin peut supprimer une table', async () => {
+    test('DELETE /restaurants/tables/:id - Un admin peut supprimer une table', async () => {
         await request(app)
-            .delete(`/tables/${tableId}`)
+            .delete(`/restaurants/${restaurantId}/tables/${tableId}`)
             .set('Cookie', adminToken)
             .expect(200);
     });
 
-    test('DELETE /tables/:id - Un employé régulier ne peut pas supprimer une table', async () => {
+    test('DELETE /restaurants/tables/:id - Un employé régulier ne peut pas supprimer une table', async () => {
         const response = await request(app)
-            .delete(`/tables/${tableId}`)
+            .delete(`/restaurants/${restaurantId}/tables/${tableId}`)
             .set('Cookie', regularToken)
             .expect(401);
         
