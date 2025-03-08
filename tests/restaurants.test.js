@@ -98,31 +98,6 @@ describe('Tests des endpoints /restaurants', () => {
     });
 
     /**
-     * Test de création avec un courriel d'admin déjà utilisé
-     */
-    test("POST /restaurants - Erreur si le courriel de l'admin est déjà utilisé", async () => {
-        const response = await request(app)
-            .post('/restaurants')
-            .send({
-                info_restaurant: {
-                    nom: 'Restaurant Unique',
-                    courriel: 'unique@restaurantTest.ca',
-                    adresse: '789 Rue Test',
-                    telephone: '777-777-7777'
-                },
-                info_admin: {
-                    nom: 'Admin Test',
-                    email: 'admin@restaurantTest.ca',
-                    mot_de_passe: 'password123',
-                    telephone: '123-456-7890',
-                }
-            })
-            .expect(400);
-        
-        expect(response.body.message).toBe("Un compte avec cet email d'administrateur existe déjà");
-    });
-
-    /**
      * Test de récupération de tous les restaurants
      */
     test('GET /restaurants - Récupérer tous les restaurants', async () => {

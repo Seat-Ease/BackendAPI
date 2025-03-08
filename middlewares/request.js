@@ -22,10 +22,6 @@ async function restaurantAccountCreationMiddleware(req, res, next) {
         if (restaurantExiste) {
             return res.status(400).json({ message: "Un compte avec ce courriel de restaurant existe déjà" });
         }
-        const adminExiste = await Employe.exists({ email: info_admin.email });
-        if (adminExiste) {
-            return res.status(400).json({ message: "Un compte avec cet email d'administrateur existe déjà" });
-        }
         next();
     } catch (error) {
         return res.status(500).json({ message: "Erreur serveur lors de la validation" });
