@@ -109,8 +109,8 @@ describe('Tests des endpoints /disponibilites', () => {
     /**
      * Test de création d'une disponibilité (Admin requis)
      */
-    test('POST /disponibilites - Un admin peut créer une disponibilité', async () => {
-        const response = await request(app)
+    test('POST /restaurants/:id_restaurant/disponibilites - Un admin peut créer une disponibilité', async () => {
+        const response1 = await request(app)
             .post(`/restaurants/${restaurantId}/disponibilites`)
             .set('Cookie', adminToken)
             .send({
@@ -120,11 +120,18 @@ describe('Tests des endpoints /disponibilites', () => {
             })
             .expect(201);
         
-        expect(response.body).toHaveProperty('_id');
-        disponibiliteId = response.body._id;
+        expect(response1.body).toHaveProperty('_id');
+        disponibiliteId = response1.body._id;
+
+        const response2 = await request(app)
+            .get(`/restaurants/${restaurantId}`)
+            .set('Cookie', adminToken)
+            .expect(200);
+
+        expect(response2.body.disponibilites.length).toBe(4)
     });
 
-    test('POST /disponibilites - Un employé régulier ne peut pas créer une disponibilité', async () => {
+    test('POST /restaurants/:id_restaurant/disponibilites - Un employé régulier ne peut pas créer une disponibilité', async () => {
         const response = await request(app)
             .post(`/restaurants/${restaurantId}/disponibilites`)
             .set('Cookie', regularToken)
@@ -141,7 +148,7 @@ describe('Tests des endpoints /disponibilites', () => {
     /**
      * Test de récupération des disponibilités d'un restaurant
      */
-    test('GET /disponibilites/:id_restaurant - Récupérer toutes les disponibilités (par défaut)', async () => {
+    test('GET /restaurants/:id_restaurant/disponibilites/ - Récupérer toutes les disponibilités (par défaut)', async () => {
         const response = await request(app)
             .get(`/restaurants/${restaurantId}/disponibilites`)
             .expect(200);
@@ -149,7 +156,7 @@ describe('Tests des endpoints /disponibilites', () => {
         expect(response.body.length).toBe(2);
     });
 
-    test('GET /disponibilites/:id_restaurant - Filtrer par date', async () => {
+    test('GET /restaurants/:id_restaurant/disponibilites/ - Filtrer par date', async () => {
         const response = await request(app)
             .get(`/restaurants/${restaurantId}/disponibilites?date=${tomorrow}`)
             .expect(200);
@@ -160,7 +167,7 @@ describe('Tests des endpoints /disponibilites', () => {
     /**
      * Test de modification d'une disponibilité (Admin requis)
      */
-    test('PUT /disponibilites/:id - Un admin peut modifier une disponibilité', async () => {
+    test('PUT /restaurants/:id_restaurant/disponibilites/:id_disponibilites - Un admin peut modifier une disponibilité', async () => {
         const response = await request(app)
             .put(`/restaurants/${restaurantId}/disponibilites/${disponibiliteId}`)
             .set('Cookie', adminToken)
@@ -170,7 +177,7 @@ describe('Tests des endpoints /disponibilites', () => {
         expect(response.body.heure).toBe('20:00');
     });
 
-    test('PUT /disponibilites/:id - Un employé régulier ne peut pas modifier une disponibilité', async () => {
+    test('PUT /restaurants/:id_restaurant/disponibilites/:id_disponibilites - Un employé régulier ne peut pas modifier une disponibilité', async () => {
         const response = await request(app)
             .put(`/restaurants/${restaurantId}/disponibilites/${disponibiliteId}`)
             .set('Cookie', regularToken)
@@ -183,14 +190,14 @@ describe('Tests des endpoints /disponibilites', () => {
     /**
      * Test de suppression d'une disponibilité (Admin requis)
      */
-    test('DELETE /disponibilites/:id - Un admin peut supprimer une disponibilité', async () => {
+    test('DELETE /restaurants/:id_restaurant/disponibilites/:id_disponibilites - Un admin peut supprimer une disponibilité', async () => {
         await request(app)
             .delete(`/restaurants/${restaurantId}/disponibilites/${disponibiliteId}`)
             .set('Cookie', adminToken)
             .expect(200);
     });
 
-    test('DELETE /disponibilites/:id - Un employé régulier ne peut pas supprimer une disponibilité', async () => {
+    test('DELETE /restaurants/:id_restaurant/disponibilites/:id_disponibilites - Un employé régulier ne peut pas supprimer une disponibilité', async () => {
         const response = await request(app)
             .delete(`/restaurants/${restaurantId}/disponibilites/${disponibiliteId}`)
             .set('Cookie', regularToken)
