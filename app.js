@@ -8,7 +8,6 @@ require('dotenv').config()
 
 const indexRouter = require('./routes/index');
 const restaurantsRouter = require('./routes/restaurantsRoute')
-const employeesRouter = require('./routes/employesRoute')
 const clientsRouter = require('./routes/clientsRoute')
 const authRouter = require('./routes/authRoute')
 
@@ -25,7 +24,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/restaurants', restaurantsRouter);
-app.use('/employes', employeesRouter);
 app.use('/clients', clientsRouter);
 app.use('/auth', authRouter);
 
@@ -42,7 +40,6 @@ app.use(function(err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
 });
 
 module.exports = app;

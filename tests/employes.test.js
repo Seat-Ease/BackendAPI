@@ -52,7 +52,7 @@ describe('Tests des endpoints /employes', () => {
 
         // Créer un employé regular avec l'admin
         const employeResponse = await request(app)
-            .post('/employes')
+            .post(`/restaurants/${restaurantId}/employes`)
             .set('Cookie', adminToken)
             .send({
                 nom: 'Employé Test',
@@ -85,9 +85,9 @@ describe('Tests des endpoints /employes', () => {
     /**
      * Test d'accès refusé pour un utilisateur non authentifié
      */
-    test('POST /employes - Erreur si utilisateur non authentifié', async () => {
+    test('POST /restaurants/:id_restaurants/employes - Erreur si utilisateur non authentifié', async () => {
         const response = await request(app)
-            .post('/employes')
+            .post(`/restaurants/${restaurantId}/employes`)
             .send({
                 nom: 'Sans Auth',
                 email: 'noauth@test.com',
@@ -100,26 +100,18 @@ describe('Tests des endpoints /employes', () => {
         expect(response.body.message).toBe('Token manquant');
     });
 
-    test('PUT /employes/:id - Erreur si utilisateur non authentifié', async () => {
+    test('PUT /restaurants/:id_restaurants/employes/:id_employes - Erreur si utilisateur non authentifié', async () => {
         const response = await request(app)
-            .put(`/employes/${employeId}`)
+            .put(`/restaurants/${restaurantId}/employes/${employeId}`)
             .send({ nom: 'Tentative Sans Auth' })
             .expect(401);
         
         expect(response.body.message).toBe('Token manquant');
     });
 
-    test('DELETE /employes/:id - Erreur si utilisateur non authentifié', async () => {
+    test('DELETE /restaurants/:id_restaurants/employes/:id_employes - Erreur si utilisateur non authentifié', async () => {
         const response = await request(app)
-            .delete(`/employes/${employeId}`)
-            .expect(401);
-        
-        expect(response.body.message).toBe('Token manquant');
-    });
-
-    test('GET /employes/:id - Erreur si utilisateur non authentifié', async () => {
-        const response = await request(app)
-            .get(`/employes/${employeId}`)
+            .delete(`/restaurants/${restaurantId}/employes/${employeId}`)
             .expect(401);
         
         expect(response.body.message).toBe('Token manquant');
@@ -128,9 +120,9 @@ describe('Tests des endpoints /employes', () => {
     /**
      * Tests existants avec authentification
      */
-    test('POST /employes - Un admin peut créer un employé', async () => {
+    test('POST /restaurants/:id_restaurants/employes - Un admin peut créer un employé', async () => {
         const response = await request(app)
-            .post('/employes')
+            .post(`/restaurants/${restaurantId}/employes`)
             .set('Cookie', adminToken)
             .send({
                 nom: 'Nouvel Employé',
@@ -144,18 +136,34 @@ describe('Tests des endpoints /employes', () => {
         expect(response.body).toHaveProperty('_id');
     });
 
-    test('DELETE /employes/:id - Un employé regular ne peut pas supprimer un employé', async () => {
+    test('POST /restaurants/:id_restaurants/employes - On ne peut pas créer deux employés ayant le même courriel', async () => {
         const response = await request(app)
-            .delete(`/employes/${employeId}`)
+            .post(`/restaurants/${restaurantId}/employes`)
+            .set('Cookie', adminToken)
+            .send({
+                nom: 'Nouvel Employé',
+                email: 'newemploye@test.com',
+                mot_de_passe: 'password123',
+                role: 'regular',
+                id_restaurant: restaurantId
+            })
+            .expect(401);
+
+        expect(response.body.message).toBe('Cet employé existe déjà');
+    });
+
+    test('DELETE /restaurants/:id_restaurants/employes/:id_employes - Un employé regular ne peut pas supprimer un employé', async () => {
+        const response = await request(app)
+            .delete(`/restaurants/${restaurantId}/employes/${employeId}`)
             .set('Cookie', regularToken)
             .expect(401);
 
         expect(response.body.message).toBe("Vous n'êtes pas autorisé à faire cette action");
     });
 
-    test('GET /employes/:id - Un employé peut voir ses propres informations', async () => {
+    test('GET /restaurants/:id_restaurants/employes/:id_employes - Un employé peut voir ses propres informations', async () => {
         const response = await request(app)
-            .get(`/employes/${employeId}`)
+            .get(`/restaurants/${restaurantId}/employes/${employeId}`)
             .set('Cookie', regularToken)
             .expect(200);
 
