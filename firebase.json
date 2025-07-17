@@ -2,6 +2,8 @@
   "functions": [
     {
       "source": "functions",
+      "region": "africa-south1",
+      "runtime": "nodejs18",
       "codebase": "default",
       "ignore": [
         "node_modules",
