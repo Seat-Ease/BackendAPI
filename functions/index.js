@@ -1,3 +1,3 @@
-const testGenerateSlots = require("./functions/slot_generation_test");
+const slotGenerationFunction = require("./functions/slot_generation_function");
 
-exports.testGenerateSlots = testGenerateSlots;
+exports.slotGenerationFunction = slotGenerationFunction;
