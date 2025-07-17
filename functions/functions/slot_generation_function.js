@@ -66,6 +66,16 @@ exports.dailySlotGeneration = onSchedule(
               console.log(e);
             }
           }
+
+          try {
+            await db.collection("restaurants").doc(doc.id).update({
+              last_slot_generated_on: new Date(),
+            });
+          } catch (e) {
+            console.log(`Erreur lors de la mise à jour 
+                de last_slot_generated_on pour 
+                ${restaurantData.account_uid}:`, e);
+          }
         }
 
         console.log("✅ Daily slot generation completed");
