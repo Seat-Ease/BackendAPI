@@ -1,3 +1,3 @@
-const generateReservationSlots = require("./functions/slot_generation");
+const testGenerateSlots = require("./functions/slot_generation_test");
 
-exports.generateReservationSlots = generateReservationSlots;
+exports.testGenerateSlots = testGenerateSlots;
