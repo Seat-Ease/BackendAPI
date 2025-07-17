@@ -1,26 +1,19 @@
 const {v4: uuidv4} = require("uuid");
 
 /**
- * Generates reservation time slots using native Date.
+ * Génère des créneaux de réservation en UTC.
  *
  * @param {Object} settings
- * - Configuration settings
  * @param {Object} settings.schedule
- * - Days open and open/close time
  * @param {Object} settings.availabilities
- * - intervalle and available tables
  * @param {string} settings.account_uid
- * - Restaurant ID
  * @param {number} [daysToGenerate=14]
- * - Number of days to generate
- * @param {string} [timeZone="Africa/Johannesburg"]
- * - Timezone (not used in Date version)
  * @return {Array<Object>} Reservation slots
  */
 function generateReservationSlots(
     settings,
     daysToGenerate = 14,
-    timeZone = "Africa/Johannesburg") {
+) {
   const slots = [];
   const schedule = settings.schedule;
   const intervalle = settings.availabilities.intervalle;
@@ -35,56 +28,58 @@ function generateReservationSlots(
   ];
 
   const now = new Date();
-  now.setHours(0, 0, 0, 0); // Start from today's midnight
+  now.setUTCHours(0, 0, 0, 0); // Start from today's midnight UTC
 
   for (let i = 0; i < daysToGenerate; i++) {
-    console.log()
-    const date = new Date(now);
-    date.setDate(now.getDate() + i);
-    const dayName = daysMap[date.getDay()];
+    const date = new Date(Date.UTC(
+        now.getUTCFullYear(),
+        now.getUTCMonth(),
+        now.getUTCDate() + i,
+        0, 0, 0, 0,
+    ));
+    const dayName = daysMap[date.getUTCDay()];
 
     if (!schedule[dayName]) continue;
+    if (!schedule.opening_time || !schedule.closing_time) continue;
 
-    const [openHour, openMinute] = schedule
-        .opening_time.split(":").map(Number);
-    const [closeHour, closeMinute] = schedule
-        .closing_time.split(":").map(Number);
+    const [openHour, openMinute] = schedule.opening_time.split(":").map(Number);
+    const [closeHour, closeMinute] = schedule.closing_time
+        .split(":").map(Number);
 
-    const open = new Date(date);
-    open.setHours(openHour, openMinute, 0, 0);
+    const openMinutes = openHour * 60 + openMinute;
+    let closeMinutes = closeHour * 60 + closeMinute;
 
-    const close = new Date(date);
-    close.setHours(closeHour, closeMinute, 0, 0);
+    // Si la fermeture est le lendemain
+    if (closeMinutes <= openMinutes) {
+      closeMinutes += 24 * 60;
+    }
 
-    // Latest slot must start at least 1 hour before closing
-    const latestSlotStart = new Date(close);
-    latestSlotStart.setHours(latestSlotStart.getHours() - 1);
+    // Dernier créneau commence 1h avant fermeture
+    const lastSlotMinutes = closeMinutes - 60;
 
-    let current = new Date(open);
-
-    console.log(current <= latestSlotStart);
-    console.log(new Date(current.getTime() +
-    intervalle * 60000) <= close);
-
-    while (
-      current <= latestSlotStart &&
-      new Date(current.getTime() + intervalle * 60000) <= close
+    const slotTimes = [];
+    for (let minutes = openMinutes;
+      minutes <= lastSlotMinutes; minutes += intervalle
     ) {
-      const startTime = current.toTimeString().slice(0, 5); // HH:mm
-      const formattedDate = current
-          .toISOString().split("T")[0]; // YYYY-MM-DD
+      const slotHour = Math.floor(minutes / 60) % 24;
+      const slotMinute = minutes % 60;
+      const timeStrMin = `${slotMinute.toString().padStart(2, "0")}`;
+      const timeStrHour = `${slotHour.toString().padStart(2, "0")}`;
+      // Format time as HH:MM
+      const timeStr = `${timeStrHour}:${timeStrMin}`;
+      slotTimes.push(timeStr);
+    }
 
+    const formattedDate = date.toISOString().split("T")[0]; // YYYY-MM-DD
+
+    for (const time of slotTimes) {
       slots.push({
         id: uuidv4(),
         restaurant_id: restaurantId,
-        time: startTime,
+        time,
         date: formattedDate,
         tables_available: availableTables,
       });
-
-      current = new Date(
-          current.getTime() + intervalle * 60000,
-      );
     }
   }
 
