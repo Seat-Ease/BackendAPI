@@ -27,8 +27,14 @@ function generateReservationSlots(
     "saturday",
   ];
 
-  const now = new Date();
-  now.setUTCHours(0, 0, 0, 0); // Start from today's midnight UTC
+  // Use startDate if provided, else today
+  let now;
+  if (settings.startDate) {
+    now = new Date(settings.startDate + "T00:00:00Z");
+  } else {
+    now = new Date();
+    now.setUTCHours(0, 0, 0, 0);
+  }
 
   for (let i = 0; i < daysToGenerate; i++) {
     const date = new Date(Date.UTC(
