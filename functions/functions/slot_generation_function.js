@@ -45,11 +45,29 @@ exports.dailySlotGeneration = onSchedule(
             continue;
           }
 
+          let startDate = null;
+          try {
+            const oldestSlotSnap = await db.collection("availabilities")
+                .where("restaurant_id", "==", restaurantData.account_uid)
+                .orderBy("date", "desc")
+                .limit(1)
+                .get();
+
+            if (!oldestSlotSnap.empty) {
+              startDate = oldestSlotSnap.docs[0]
+                  .data().date;
+            }
+          } catch (e) {
+            console.log(`Error fetching youngest slot 
+              for ${restaurantData.account_uid}:`, e);
+          }
+
           const slots = generateReservationSlots(
               {
                 schedule: restaurantData.schedule,
                 availabilities: restaurantData.availabilities,
                 account_uid: restaurantData.account_uid,
+                startDate,
               },
               daysToGenerate,
           );
