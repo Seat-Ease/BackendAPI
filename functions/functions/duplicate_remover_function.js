@@ -10,7 +10,6 @@ const db = getFirestore();
 exports.removeAvailabilityDuplicates = onSchedule(
     {
       schedule: "0 3 * * *", // Every day at 03:00 UTC
-      region: "africa-south1",
       timeoutSeconds: 300,
       memory: "1GiB",
     },

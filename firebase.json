@@ -2,7 +2,7 @@
   "functions": [
     {
       "source": "functions",
-      "region": "africa-south1",
+      "region": "us-central1",
       "runtime": "nodejs18",
       "codebase": "default",
       "ignore": [

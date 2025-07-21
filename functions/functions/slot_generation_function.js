@@ -9,8 +9,7 @@ const db = getFirestore();
 
 exports.dailySlotGeneration = onSchedule(
     {
-      schedule: "0 2 * * *", // Tous les jours à 2h du matin UTC
-      region: "africa-south1",
+      schedule: "0 2 * * *",
       timeoutSeconds: 300,
       memory: "1GiB",
     },
